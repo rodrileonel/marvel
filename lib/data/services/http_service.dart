@@ -2,6 +2,9 @@ import 'dart:developer';
 
 import 'package:http/http.dart';
 import 'package:marvel/data/api/config_api.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+
 
 class HttpService {
   final Client _client;
@@ -25,9 +28,12 @@ class HttpService {
     Map<String, dynamic>? arguments,
   }) async {
     log('$baseUrl$endpoint', name: 'http');
+    final ts = DateTime.now().millisecondsSinceEpoch;
+    final hash = md5.convert(utf8.encode('$ts$privateKey$publicKey')).toString();
     final Map<String, dynamic> args ={};
     args.addAll(arguments??{});
-    args.addAll( {'apikey':publicKey,'hash':'c3de3454e8dc6486f0e30e8f937745fe','ts':'1677784856'});
+    args.addAll( {'apikey':publicKey,'hash':hash,'ts':'$ts'});
+    log({'apikey':publicKey,'hash':hash,'ts':'$ts'}.toString(), name: 'request');
     return _client.get(
       Uri.parse('$baseUrl$endpoint').replace(queryParameters: args),
       headers: headers ?? await _configApi.headers,
